@@ -29,6 +29,7 @@
 #define NEON_MATHFUN_H
 
 #include <arm_neon.h>
+#include <math.h>
 
 // Portable FMA macros: use hardware FMA on AArch64, fall back to MLA on AArch32
 #if defined(__aarch64__)
@@ -408,7 +409,7 @@ static inline float32x4_t atan2_ps(float32x4_t a, float32x4_t b)
     return vld1q_f32(tmpx);
 }
 
-static inline float32x4_t trunc_ps(const float32x4_t& x)
+static inline float32x4_t trunc_ps(const float32x4_t x)
 {
     // truncate toward zero
 #if __aarch64__
@@ -419,7 +420,7 @@ static inline float32x4_t trunc_ps(const float32x4_t& x)
 #endif
 }
 
-static inline float32x4_t fmod_ps(const float32x4_t& x, const float32x4_t& y)
+static inline float32x4_t fmod_ps(const float32x4_t x, const float32x4_t y)
 {
     // fmod(x,y) = x - trunc(x/y) * y
 #if __aarch64__
@@ -431,7 +432,7 @@ static inline float32x4_t fmod_ps(const float32x4_t& x, const float32x4_t& y)
     return vsubq_f32(x, vmulq_f32(tq, y));
 }
 
-static inline float32x4_t round_ps(const float32x4_t& x)
+static inline float32x4_t round_ps(const float32x4_t x)
 {
 #if __aarch64__
     return vrndnq_f32(x);
@@ -453,7 +454,7 @@ static inline float32x4_t round_ps(const float32x4_t& x)
 #endif
 }
 
-static inline float32x4_t logaddexp_ps(const float32x4_t& x, const float32x4_t& y)
+static inline float32x4_t logaddexp_ps(const float32x4_t x, const float32x4_t y)
 {
     float32x4_t max_xy = vmaxq_f32(x, y);
     float32x4_t min_xy = vminq_f32(x, y);
@@ -464,7 +465,7 @@ static inline float32x4_t logaddexp_ps(const float32x4_t& x, const float32x4_t& 
     return vaddq_f32(max_xy, log_result);
 }
 
-static inline float32x4_t floor_ps(const float32x4_t& x)
+static inline float32x4_t floor_ps(const float32x4_t x)
 {
 #if __aarch64__
     return vrndmq_f32(x);
@@ -476,7 +477,7 @@ static inline float32x4_t floor_ps(const float32x4_t& x)
 #endif
 }
 
-static inline float32x4_t floor_divide_ps(const float32x4_t& x, const float32x4_t& y)
+static inline float32x4_t floor_divide_ps(const float32x4_t x, const float32x4_t y)
 {
 #if __aarch64__
     float32x4_t q = vdivq_f32(x, y);
@@ -486,7 +487,7 @@ static inline float32x4_t floor_divide_ps(const float32x4_t& x, const float32x4_
     return floor_ps(q);
 }
 
-static inline float32x4_t remainder_ps(const float32x4_t& x, const float32x4_t& y)
+static inline float32x4_t remainder_ps(const float32x4_t x, const float32x4_t y)
 {
 #if __aarch64__
     float32x4_t q = vdivq_f32(x, y);
@@ -497,7 +498,7 @@ static inline float32x4_t remainder_ps(const float32x4_t& x, const float32x4_t& 
     return vsubq_f32(x, vmulq_f32(rq, y));
 }
 
-#include "neon_mathfun_tanh.h"
+// #include "neon_mathfun_tanh.h"
 
 // Clean up macros
 #undef VFMAQ_F32
