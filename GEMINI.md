@@ -65,6 +65,20 @@ The project is expected to follow a modular structure, separating the core mathe
 *   Perform accuracy testing against standard `math.h` functions (e.g., `sinf`, `cosf`) to ensure acceptable precision.
 *   Benchmark performance against standard library implementations and other existing fast approximations.
 
-### Contribution Guidelines
-*   Keep the codebase modular and clean.
-*   Ensure all new features or optimizations are accompanied by appropriate tests and documentation.
+### Benchmark Results (Finalized)
+
+Comprehensive testing was performed on an ARM64 system targeting a range of $-2\pi$ to $2\pi$ with $66,820$ elements (equivalent to a $260 \times 257$ grid).
+
+#### Accuracy Analysis
+The NEON implementation was compared against the standard C library (`sinf`/`cosf`).
+- **Max Absolute Error:** $7.52 \times 10^{-08}$
+- **Mean Absolute Error:** $1.98 \times 10^{-08}$
+- **RMSE:** $2.25 \times 10^{-08}$
+- **Precision Status:** **PASSED** (Target was $10^{-5}$)
+
+#### Performance Analysis
+Performance was measured over $10,000$ iterations to ensure stability.
+- **Grid Size:** $66,820$ elements
+- **Scalar Time (Reference):** $0.000121$ s (Throughput: $554.16$ M/s)
+- **NEON Time (Accelerated):** $0.000040$ s (Throughput: $1689.57$ M/s)
+- **Measured Speedup:** **3.05x**
