@@ -14,6 +14,30 @@ extern "C" {
  */
 void sincos_acc_grid(const float* input, float* sin_out, float* cos_out, int count);
 
+/**
+ * @brief Accelerated tangent for arbitrary grid sizes.
+ */
+void tan_acc_grid(const float* input, float* output, int count);
+
+/**
+ * @brief Accelerated arcsine for arbitrary grid sizes.
+ */
+void asin_acc_grid(const float* input, float* output, int count);
+
+/**
+ * @brief Accelerated arccosine for arbitrary grid sizes.
+ */
+void acos_acc_grid(const float* input, float* output, int count);
+
+/**
+ * @brief Accelerated arctangent2 for arbitrary grid sizes.
+ * @param y      Pointer to y-coordinate array.
+ * @param x      Pointer to x-coordinate array.
+ * @param output Pointer to output angle array.
+ * @param count  Total number of elements.
+ */
+void atan2_acc_grid(const float* y, const float* x, float* output, int count);
+
 #ifdef __cplusplus
 }
 #endif

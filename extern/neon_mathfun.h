@@ -397,16 +397,52 @@ static inline float32x4_t acos_ps(float32x4_t x)
     return yacos;
 }
 
-static inline float32x4_t atan2_ps(float32x4_t a, float32x4_t b)
+static inline float32x4_t atan2_ps(float32x4_t y, float32x4_t x)
 {
-    //TODO neon optimize
-    float tmpx[4];
-    float tmpy[4];
-    vst1q_f32(tmpx, a);
-    vst1q_f32(tmpy, b);
-    for (int i = 0; i < 4; i++)
-        tmpx[i] = atan2f(tmpx[i], tmpy[i]);
-    return vld1q_f32(tmpx);
+    float32x4_t pi = vdupq_n_f32(3.14159265358979323846f);
+    float32x4_t pi_2 = vdupq_n_f32(1.57079632679489661923f);
+    float32x4_t zero = vdupq_n_f32(0.0f);
+
+    float32x4_t abs_y = vabsq_f32(y);
+    float32x4_t abs_x = vabsq_f32(x);
+
+    // mask: abs_y > abs_x
+    uint32x4_t swap_mask = vcgtq_f32(abs_y, abs_x);
+    
+    float32x4_t num = vbslq_f32(swap_mask, abs_x, abs_y);
+    float32x4_t den = vbslq_f32(swap_mask, abs_y, abs_x);
+
+    // atan(z) approximation for z in [0, 1]
+    // atan(z) ~ z * (0.9998660 + z^2 * (-0.3302995 + z^2 * (0.1801410 + z^2 * (-0.0851330 + z^2 * 0.0208351))))
+    float32x4_t z = div_ps(num, den);
+    float32x4_t z2 = vmulq_f32(z, z);
+    
+    float32x4_t poly;
+    poly = vdupq_n_f32(0.0208351f);
+    poly = vmlaq_f32(vdupq_n_f32(-0.0851330f), poly, z2);
+    poly = vmlaq_f32(vdupq_n_f32(0.1801410f), poly, z2);
+    poly = vmlaq_f32(vdupq_n_f32(-0.3302995f), poly, z2);
+    poly = vmlaq_f32(vdupq_n_f32(0.9998660f), poly, z2);
+    
+    float32x4_t angle = vmulq_f32(z, poly);
+
+    // if swapped, angle = pi/2 - angle
+    angle = vbslq_f32(swap_mask, vsubq_f32(pi_2, angle), angle);
+
+    // if x < 0, angle = pi - angle
+    uint32x4_t x_neg_mask = vcltq_f32(x, zero);
+    angle = vbslq_f32(x_neg_mask, vsubq_f32(pi, angle), angle);
+
+    // if y < 0, angle = -angle
+    uint32x4_t y_neg_mask = vcltq_f32(y, zero);
+    angle = vbslq_f32(y_neg_mask, vnegq_f32(angle), angle);
+
+    // handle atan2(0, 0) = 0 (den is 0)
+    uint32x4_t x_zero_mask = vceqq_f32(x, zero);
+    uint32x4_t y_zero_mask = vceqq_f32(y, zero);
+    angle = vbslq_f32(vandq_u32(x_zero_mask, y_zero_mask), zero, angle);
+
+    return angle;
 }
 
 static inline float32x4_t trunc_ps(const float32x4_t x)
